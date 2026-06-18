@@ -1,17 +1,4 @@
-import readline from "node:readline";
 import { UsageStore } from "./store.js";
-
-const store = new UsageStore();
-await store.load();
-
-function write(message) {
-  const payload = JSON.stringify(message);
-  process.stdout.write(`Content-Length: ${Buffer.byteLength(payload)}\r\n\r\n${payload}`);
-}
-
-function reply(id, result) {
-  write({ jsonrpc: "2.0", id, result });
-}
 
 const tools = [
   {
@@ -45,29 +32,39 @@ const tools = [
   }
 ];
 
-const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
-let buffer = "";
+export function listTools() {
+  return tools;
+}
 
-process.stdin.on("data", (chunk) => {
-  buffer += chunk.toString("utf8");
-  while (true) {
-    const headerEnd = buffer.indexOf("\r\n\r\n");
-    if (headerEnd === -1) return;
-    const header = buffer.slice(0, headerEnd);
-    const match = header.match(/Content-Length:\s*(\d+)/i);
-    if (!match) return;
-    const length = Number(match[1]);
-    const start = headerEnd + 4;
-    if (buffer.length < start + length) return;
-    const body = buffer.slice(start, start + length);
-    buffer = buffer.slice(start + length);
-    handle(JSON.parse(body));
+export async function dispatchToolCall(storeInstance, name, args = {}) {
+  if (name === "usage_summary") {
+    const windowMs = { "1m": 60_000, "1h": 3_600_000, "24h": 86_400_000 }[args.window] ?? 3_600_000;
+    return { content: [{ type: "text", text: JSON.stringify(await storeInstance.summarize(windowMs), null, 2) }] };
   }
-});
+  if (name === "usage_timeseries") {
+    const bucketMs = args.bucket === "1h" ? 3_600_000 : args.bucket === "5m" ? 300_000 : 60_000;
+    const windowMs = args.window === "24h" ? 86_400_000 : args.window === "1m" ? 60_000 : 3_600_000;
+    return { content: [{ type: "text", text: JSON.stringify(await storeInstance.timeseries(windowMs, bucketMs), null, 2) }] };
+  }
+  if (name === "usage_recent_threads") {
+    const limit = Number.isFinite(args.limit) && args.limit > 0 ? args.limit : 10;
+    return { content: [{ type: "text", text: JSON.stringify(await storeInstance.recentThreads(limit), null, 2) }] };
+  }
+  return { error: { code: -32601, message: "Method not found" } };
+}
 
-async function handle(message) {
+function encodeMessage(message) {
+  const payload = JSON.stringify(message);
+  return `Content-Length: ${Buffer.byteLength(payload)}\r\n\r\n${payload}`;
+}
+
+function reply(stdout, id, result) {
+  stdout.write(encodeMessage({ jsonrpc: "2.0", id, result }));
+}
+
+export async function handleMcpMessage(storeInstance, message, stdout = process.stdout) {
   if (message.method === "initialize") {
-    reply(message.id, {
+    reply(stdout, message.id, {
       protocolVersion: "2024-11-05",
       capabilities: { tools: {} },
       serverInfo: { name: "codexmeter", version: "0.1.0" }
@@ -75,25 +72,51 @@ async function handle(message) {
     return;
   }
   if (message.method === "tools/list") {
-    reply(message.id, { tools });
+    reply(stdout, message.id, { tools: listTools() });
     return;
   }
   if (message.method === "tools/call") {
     const { name, arguments: args = {} } = message.params || {};
-    if (name === "usage_summary") {
-      reply(message.id, { content: [{ type: "text", text: JSON.stringify(await store.summarize({ "1m": 60_000, "1h": 3_600_000, "24h": 86_400_000 }[args.window] || 3_600_000), null, 2) }] });
+    const result = await dispatchToolCall(storeInstance, name, args);
+    if (result.error) {
+      reply(stdout, message.id, { error: result.error });
       return;
     }
-    if (name === "usage_timeseries") {
-      const bucketMs = args.bucket === "1h" ? 3_600_000 : args.bucket === "5m" ? 300_000 : 60_000;
-      const windowMs = args.window === "24h" ? 86_400_000 : 3_600_000;
-      reply(message.id, { content: [{ type: "text", text: JSON.stringify(await store.timeseries(windowMs, bucketMs), null, 2) }] });
-      return;
-    }
-    if (name === "usage_recent_threads") {
-      reply(message.id, { content: [{ type: "text", text: JSON.stringify(await store.recentThreads(args.limit || 10), null, 2) }] });
-      return;
+    reply(stdout, message.id, result);
+    return;
+  }
+  if (message.id != null) {
+    reply(stdout, message.id, { error: { code: -32601, message: "Method not found" } });
+  }
+}
+
+export async function createMcpRuntime() {
+  const store = new UsageStore();
+  await store.load();
+  return { store };
+}
+
+export async function startMcpServer(stdin = process.stdin, stdout = process.stdout) {
+  const { store } = await createMcpRuntime();
+  let buffer = "";
+  function consumeBuffer() {
+    while (buffer.length > 0) {
+      const headerEnd = buffer.indexOf("\r\n\r\n");
+      if (headerEnd === -1) return;
+      const header = buffer.slice(0, headerEnd);
+      const match = header.match(/Content-Length:\s*(\d+)/i);
+      if (!match) return;
+      const length = Number(match[1]);
+      const start = headerEnd + 4;
+      if (buffer.length < start + length) return;
+      const body = buffer.slice(start, start + length);
+      buffer = buffer.slice(start + length);
+      handleMcpMessage(store, JSON.parse(body), stdout);
     }
   }
-  if (message.id != null) reply(message.id, { error: { code: -32601, message: "Method not found" } });
+  stdin.on("data", (chunk) => {
+    buffer += chunk.toString("utf8");
+    consumeBuffer();
+  });
+  return { store };
 }

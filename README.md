@@ -2,7 +2,7 @@
 
 Codex Meter is a local Codex usage meter and dashboard. It captures Codex telemetry on your machine, stores it in a small JSONL log, and renders rolling usage windows for the last minute, last hour, and last 24 hours.
 
-Planned public repository name: `jensabrahamsson/codex-meter`.
+Repository: `jensabrahamsson/codex-meter`.
 
 The project is designed for local visibility first:
 - a live dashboard runs on `http://127.0.0.1:8080`
@@ -31,6 +31,11 @@ It renders:
 Clone or place the `codexmeter` folder anywhere you want to develop from. The plugin manifest lives at `.codex-plugin/plugin.json`.
 
 If you want the plugin to appear in Codex, the repository ships with a personal marketplace entry at `~/.agents/plugins/marketplace.json`.
+
+## Launchers
+
+- `npm start` runs the ingest server and dashboard together
+- `npm run mcp` starts the MCP server on stdio
 
 ## Configuration
 
@@ -143,14 +148,10 @@ The repository includes Dependabot and a security policy so dependency updates a
 ```bash
 npm test
 npm start
-node src/mcp-server.js
+npm run mcp
 ```
 
-The test suite covers aggregation and empty-window handling. The runtime smoke test should cover:
-- dashboard startup
-- ingest startup
-- a synthetic telemetry post
-- a successful usage summary response
+The test suite covers aggregation, empty-window handling, ingest parsing, dashboard routes, and MCP tool dispatch.
 
 ## License
 

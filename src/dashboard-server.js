@@ -1,249 +1,16 @@
+import fs from "node:fs/promises";
 import http from "node:http";
-import { host, dashboardPort } from "./config.js";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { UsageStore } from "./store.js";
 
-const store = new UsageStore();
-await store.load();
-
 const windows = { "1m": 60_000, "1h": 3_600_000, "24h": 86_400_000 };
+const moduleDir = path.dirname(fileURLToPath(import.meta.url));
+const dashboardHtmlPath = path.resolve(moduleDir, "../assets/dashboard.html");
 
-function html() {
-  return `<!doctype html>
-  <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#050816" />
-    <title>Codex Meter</title>
-    <style>
-      :root {
-        --bg: #050816;
-        --bg-elevated: rgba(10, 17, 36, 0.82);
-        --panel: rgba(13, 20, 42, 0.92);
-        --panel-strong: #101a35;
-        --line: rgba(122, 151, 255, 0.18);
-        --line-strong: rgba(122, 151, 255, 0.32);
-        --text: #eef2ff;
-        --muted: #8c96ba;
-        --accent: #8ee6c0;
-        --accent-2: #7ca8ff;
-        --warn: #f3c969;
-      }
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        min-height: 100vh;
-        color: var(--text);
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background:
-          radial-gradient(circle at top left, rgba(124, 168, 255, 0.16), transparent 28%),
-          radial-gradient(circle at 85% 10%, rgba(142, 230, 192, 0.12), transparent 24%),
-          linear-gradient(180deg, #050816 0%, #0a1020 100%);
-      }
-      main { max-width: 1240px; margin: 0 auto; padding: 28px 22px 40px; }
-      .hero {
-        display: grid;
-        grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.9fr);
-        gap: 16px;
-        align-items: stretch;
-        margin-bottom: 16px;
-      }
-      .panel {
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 16px;
-        box-shadow: 0 18px 70px rgba(0, 0, 0, 0.3);
-        backdrop-filter: blur(14px);
-      }
-      .title-panel { padding: 22px; position: relative; overflow: hidden; }
-      .title-panel::after {
-        content: "";
-        position: absolute;
-        inset: auto -14% -55% auto;
-        width: 320px;
-        height: 320px;
-        background: radial-gradient(circle, rgba(124, 168, 255, 0.2), transparent 65%);
-        pointer-events: none;
-      }
-      .eyebrow { color: var(--accent); text-transform: uppercase; letter-spacing: 0.18em; font-size: 12px; margin: 0 0 10px; }
-      h1 { margin: 0; font-size: 38px; line-height: 1.05; letter-spacing: -0.03em; }
-      .lede { margin: 12px 0 0; max-width: 70ch; color: var(--muted); line-height: 1.6; }
-      .status-strip {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 18px;
-      }
-      .chip {
-        border: 1px solid var(--line-strong);
-        background: rgba(9, 14, 32, 0.64);
-        color: var(--text);
-        border-radius: 999px;
-        padding: 8px 12px;
-        font-size: 13px;
-      }
-      .status-card { padding: 18px; display: grid; gap: 12px; }
-      .status-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        gap: 12px;
-        padding: 10px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      }
-      .status-row:last-child { border-bottom: 0; }
-      .label { color: var(--muted); font-size: 13px; }
-      .value { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 14px;
-        margin-top: 16px;
-      }
-      .metric { padding: 18px; background: var(--bg-elevated); border: 1px solid var(--line); border-radius: 16px; }
-      .metric .k { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; }
-      .metric .v { font-size: 34px; font-weight: 700; margin-top: 10px; letter-spacing: -0.04em; }
-      .metric .sub { color: var(--muted); font-size: 13px; margin-top: 6px; line-height: 1.45; }
-      .sections {
-        display: grid;
-        grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.8fr);
-        gap: 16px;
-        margin-top: 16px;
-      }
-      .section { padding: 18px; }
-      .section h2 { margin: 0 0 12px; font-size: 18px; }
-      .chart {
-        display: grid;
-        grid-template-columns: repeat(12, minmax(0, 1fr));
-        gap: 8px;
-        align-items: end;
-        min-height: 180px;
-        padding-top: 8px;
-      }
-      .bar {
-        display: flex;
-        flex-direction: column;
-        justify-content: end;
-        gap: 8px;
-        align-items: center;
-      }
-      .bar span {
-        width: 100%;
-        border-radius: 8px 8px 4px 4px;
-        background: linear-gradient(180deg, rgba(142, 230, 192, 0.95), rgba(124, 168, 255, 0.8));
-        min-height: 6px;
-      }
-      .bar label {
-        font-size: 11px;
-        color: var(--muted);
-        white-space: nowrap;
-      }
-      pre {
-        margin: 0;
-        font-size: 12px;
-        line-height: 1.6;
-        color: #d5ddff;
-        overflow: auto;
-      }
-      .footer {
-        margin-top: 16px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        color: var(--muted);
-        font-size: 13px;
-      }
-      @media (max-width: 960px) {
-        .hero, .sections, .grid { grid-template-columns: 1fr; }
-      }
-    </style>
-  </head>
-  <body>
-    <main>
-      <div class="hero">
-        <section class="panel title-panel">
-          <p class="eyebrow">Codex Meter</p>
-          <h1>Local Codex usage, rendered as a live meter.</h1>
-          <p class="lede">
-            Track token usage in rolling windows, inspect recent threads, and keep the collector
-            local to your machine. The dashboard reads from the same usage store as the MCP tools.
-          </p>
-          <div class="status-strip">
-            <span class="chip">1m / 1h / 24h windows</span>
-            <span class="chip">localhost ingest</span>
-            <span class="chip">MCP + dashboard</span>
-          </div>
-        </section>
-        <aside class="panel status-card" id="health"></aside>
-      </div>
-
-      <section class="grid" id="summary"></section>
-
-      <div class="sections">
-        <section class="panel section">
-          <h2>Usage Trend</h2>
-          <div class="chart" id="chart"></div>
-          <div class="footer" id="chart-meta"></div>
-        </section>
-        <section class="panel section">
-          <h2>Recent Threads</h2>
-          <pre id="threads">Loading...</pre>
-        </section>
-      </div>
-    </main>
-    <script>
-      const windows = ${JSON.stringify(windows)};
-      const labelForBucket = (index, total) => total <= 1 ? 'now' : index === total - 1 ? 'now' : index % 2 === 0 ? '' : '';
-
-      function fmtTime(value) {
-        if (!value) return 'never';
-        return new Date(value).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
-      }
-
-      async function loadData() {
-        const summaryTargets = Object.keys(windows);
-        const summaries = await Promise.all(summaryTargets.map(async (window) => {
-          const res = await fetch('/api/usage/summary?window=' + window);
-          return [window, await res.json()];
-        }));
-        document.getElementById('summary').innerHTML = summaries.map(([window, data]) => {
-          const split = [
-            ['Input', data.inputTokens],
-            ['Cached', data.cachedInputTokens],
-            ['Output', data.outputTokens]
-          ].map(([label, value]) => '<div class="status-row"><div class="label">' + label + '</div><div class="value">' + value + '</div></div>').join('');
-          return '<article class="metric"><div class="k">' + window + '</div><div class="v">' + data.totalTokens + '</div><div class="sub">Average ' + data.averageTokensPerEvent + ' tokens per event. ' + data.eventCount + ' events in the window.</div>' + split + '</article>';
-        }).join('');
-
-        const health = await (await fetch('/health')).json();
-        document.getElementById('health').innerHTML =
-          '<div class="status-row"><div class="label">Collector</div><div class="value">' + (health.ok ? 'Healthy' : 'Down') + '</div></div>' +
-          '<div class="status-row"><div class="label">Buffered events</div><div class="value">' + health.events + '</div></div>' +
-          '<div class="status-row"><div class="label">Last refresh</div><div class="value">' + fmtTime(Date.now()) + '</div></div>' +
-          '<div class="status-row"><div class="label">Host</div><div class="value">127.0.0.1</div></div>';
-
-        const series = await (await fetch('/api/usage/timeseries?window=1h&bucket=5m')).json();
-        const maxValue = Math.max(1, ...series.map((bucket) => bucket.inputTokens + bucket.cachedInputTokens + bucket.outputTokens + bucket.reasoningOutputTokens));
-        document.getElementById('chart').innerHTML = series.map((bucket, index) => {
-          const total = bucket.inputTokens + bucket.cachedInputTokens + bucket.outputTokens + bucket.reasoningOutputTokens;
-          const height = Math.max(6, Math.round((total / maxValue) * 160));
-          const date = new Date(bucket.start);
-          const label = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          return '<div class="bar"><span style="height:' + height + 'px" title="' + label + ' · ' + total + ' tokens"></span><label>' + label + '</label></div>';
-        }).join('');
-        const latest = series.at(-1) || { inputTokens: 0, cachedInputTokens: 0, outputTokens: 0, reasoningOutputTokens: 0 };
-        document.getElementById('chart-meta').innerHTML = '<span>Window: 1 hour, bucket size: 5 minutes</span><span>Latest bucket: ' + (latest.inputTokens + latest.cachedInputTokens + latest.outputTokens + latest.reasoningOutputTokens) + ' tokens</span>';
-
-        const threads = await (await fetch('/api/usage/recent-threads')).json();
-        document.getElementById('threads').textContent = JSON.stringify(threads, null, 2);
-      }
-
-      loadData();
-      setInterval(loadData, 5000);
-    </script>
-  </body>
-  </html>`;
+export async function buildDashboardHtml() {
+  const template = await fs.readFile(dashboardHtmlPath, "utf8");
+  return template.replace("__WINDOWS__", JSON.stringify(windows));
 }
 
 function sendJson(res, statusCode, body) {
@@ -254,55 +21,52 @@ function sendJson(res, statusCode, body) {
   res.end(JSON.stringify(body));
 }
 
-const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  if (req.method === "GET" && url.pathname === "/") {
-    res.writeHead(200, {
-      "content-type": "text/html",
-      "cache-control": "no-store",
-      "content-security-policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'"
-    });
-    res.end(html());
-    return;
-  }
-  if (req.method === "GET" && url.pathname === "/api/usage/summary") {
-    const window = url.searchParams.get("window") || "1h";
-    sendJson(res, 200, await store.summarize(windows[window] || windows["1h"]));
-    return;
-  }
-  if (req.method === "GET" && url.pathname === "/api/usage/timeseries") {
-    const window = url.searchParams.get("window") || "1h";
-    const bucket = url.searchParams.get("bucket") || "1m";
-    const bucketMs = bucket === "1h" ? 3_600_000 : bucket === "5m" ? 300_000 : 60_000;
-    sendJson(res, 200, await store.timeseries(windows[window] || windows["1h"], bucketMs));
-    return;
-  }
-  if (req.method === "GET" && url.pathname === "/api/usage/recent-threads") {
-    sendJson(res, 200, await store.recentThreads());
-    return;
-  }
-  if (req.method === "GET" && url.pathname === "/health") {
-    sendJson(res, 200, { ok: true, events: store.events.length });
-    return;
-  }
-  sendJson(res, 404, { ok: false, error: "Not found" });
-});
+export async function createDashboardRuntime() {
+  const store = new UsageStore();
+  await store.load();
+  return { store };
+}
 
-let currentPort = dashboardPort;
-
-function listen(port) {
-  currentPort = port;
-  server.listen(port, host, () => {
-    console.log(`Dashboard listening on http://${host}:${port}`);
+export function createDashboardServer(store) {
+  return http.createServer(async (req, res) => {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    if (req.method === "GET" && url.pathname === "/") {
+      res.writeHead(200, {
+        "content-type": "text/html",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'"
+      });
+      res.end(await buildDashboardHtml());
+      return;
+    }
+    if (req.method === "GET" && url.pathname === "/api/usage/summary") {
+      const window = url.searchParams.get("window") || "1h";
+      sendJson(res, 200, await store.summarize(windows[window] || windows["1h"]));
+      return;
+    }
+    if (req.method === "GET" && url.pathname === "/api/usage/timeseries") {
+      const window = url.searchParams.get("window") || "1h";
+      const bucket = url.searchParams.get("bucket") || "1m";
+      const bucketMs = bucket === "1h" ? 3_600_000 : bucket === "5m" ? 300_000 : 60_000;
+      sendJson(res, 200, await store.timeseries(windows[window] || windows["1h"], bucketMs));
+      return;
+    }
+    if (req.method === "GET" && url.pathname === "/api/usage/recent-threads") {
+      sendJson(res, 200, await store.recentThreads());
+      return;
+    }
+    if (req.method === "GET" && url.pathname === "/health") {
+      sendJson(res, 200, { ok: true, events: store.events.length });
+      return;
+    }
+    sendJson(res, 404, { ok: false, error: "Not found" });
   });
 }
 
-server.on("error", (error) => {
+export function handlePortError(error, currentPort, listenNext) {
   if (error.code === "EADDRINUSE") {
-    listen(currentPort + 1);
-    return;
+    listenNext(currentPort + 1);
+    return true;
   }
   throw error;
-});
-
-listen(currentPort);
+}

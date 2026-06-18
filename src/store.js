@@ -1,14 +1,29 @@
 import fs from "node:fs";
 import fsp from "node:fs/promises";
-import { dataDir, dbPath, statePath } from "./config.js";
+import { getDataDir, getDbPath, getStatePath } from "./config.js";
 
 function ensureDir() {
-  fs.mkdirSync(dataDir, { recursive: true });
+  fs.mkdirSync(getDataDir(), { recursive: true });
 }
 
 function toCount(value) {
   const number = Number(value);
   return Number.isFinite(number) && number > 0 ? Math.floor(number) : 0;
+}
+
+export function parseUsageJsonl(content) {
+  const lines = content.trim() ? content.trim().split("\n").filter(Boolean) : [];
+  return lines.map((line) => JSON.parse(line));
+}
+
+export async function readEventsFromFile(readFile, filePath) {
+  try {
+    const content = await readFile(filePath, "utf8");
+    return parseUsageJsonl(content);
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+    return [];
+  }
 }
 
 export function normalizeEvent(event) {
@@ -46,14 +61,7 @@ export class UsageStore {
   }
 
   async readEvents() {
-    try {
-      const content = await fsp.readFile(dbPath, "utf8");
-      const lines = content.trim() ? content.trim().split("\n").filter(Boolean) : [];
-      return lines.map((line) => JSON.parse(line));
-    } catch (error) {
-      if (error.code !== "ENOENT") throw error;
-      return [];
-    }
+    return readEventsFromFile(fsp.readFile, getDbPath());
   }
 
   async refresh() {
@@ -63,7 +71,7 @@ export class UsageStore {
   async append(event) {
     const entry = normalizeEvent(event);
     this.events.push(entry);
-    await fsp.appendFile(dbPath, `${JSON.stringify(entry)}\n`);
+    await fsp.appendFile(getDbPath(), `${JSON.stringify(entry)}\n`);
     await this.persistState();
     return entry;
   }
@@ -73,7 +81,7 @@ export class UsageStore {
       lastEventAt: this.events.length ? this.events[this.events.length - 1].timestamp : null,
       totalEvents: this.events.length
     };
-    await fsp.writeFile(statePath, JSON.stringify(state, null, 2));
+    await fsp.writeFile(getStatePath(), JSON.stringify(state, null, 2));
   }
 
   getEvents(windowMs = 24 * 60 * 60 * 1000) {
