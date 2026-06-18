@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "codexmeter": {
+      "command": "node",
+      "args": ["src/mcp-server.js"]
+    }
+  }
+}

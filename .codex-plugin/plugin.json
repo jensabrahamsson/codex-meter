@@ -1,0 +1,20 @@
+{
+  "name": "codexmeter",
+  "version": "0.1.0",
+  "description": "Local token usage dashboard for Codex.",
+  "author": {
+    "name": "Local developer"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codexmeter",
+    "shortDescription": "Track Codex token usage locally.",
+    "longDescription": "Codexmeter captures local Codex telemetry, stores rolling usage windows, and serves a dashboard plus MCP tools.",
+    "developerName": "Local developer",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "Show me Codex token usage for the last minute, hour, and day."
+  },
+  "mcpServers": "./.mcp.json",
+  "apps": "./.app.json"
+}
