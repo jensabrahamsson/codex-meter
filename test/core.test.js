@@ -218,15 +218,20 @@ test("ingest helpers normalize payloads", async () => {
 test("ingest runtime and port helpers cover direct branches", async () => {
   const runtime = await ingestModule.createIngestRuntime();
   assert.ok(runtime.store);
-  const calls = [];
-  assert.equal(ingestModule.handleIngestPortError({ code: "EADDRINUSE" }, 4567, (port) => calls.push(port)), true);
-  assert.deepEqual(calls, [4568]);
+  assert.throws(
+    () => ingestModule.handleIngestPortError({ code: "EADDRINUSE" }, 4568, () => {}),
+    (error) => error.code === "EADDRINUSE" && /must bind the configured ingest port/.test(error.message)
+  );
 });
 
 test("dashboard helpers render a high fidelity UI", async () => {
   const html = await dashboardModule.buildDashboardHtml();
   assert.match(html, /Codex Meter/);
-  assert.match(html, /127\.0\.0\.1:8080/);
+  assert.match(html, /Collector Status/);
+  assert.match(html, /Trend View/);
+  assert.match(html, /Peak bucket/);
+  assert.match(html, /Selected Snapshot/);
+  assert.match(html, /\/api\/usage\/summary/);
 });
 
 test("dashboard server routes serve the expected resources", async () => {

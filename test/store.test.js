@@ -168,7 +168,9 @@ test("dashboard html includes Codex Meter and local endpoints", async () => {
   const { buildDashboardHtml } = dashboardModule;
   const html = await buildDashboardHtml();
   assert.match(html, /Codex Meter/);
-  assert.match(html, /127\.0\.0\.1:8080/);
+  assert.match(html, /Collector Status/);
+  assert.match(html, /Trend View/);
+  assert.match(html, /Selected Snapshot/);
   assert.match(html, /\/api\/usage\/summary/);
 });
 

@@ -3,187 +3,1646 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="dark" />
-  <meta name="theme-color" content="#050816" />
+  <meta name="theme-color" content="#f2efe8" />
   <title>Codex Meter</title>
   <style>
     :root {
-      --bg: #050816;
-      --bg-elevated: rgba(10, 17, 36, 0.82);
-      --panel: rgba(13, 20, 42, 0.92);
-      --panel-strong: #101a35;
-      --line: rgba(122, 151, 255, 0.18);
-      --line-strong: rgba(122, 151, 255, 0.32);
-      --text: #eef2ff;
-      --muted: #8c96ba;
-      --accent: #8ee6c0;
-      --accent-2: #7ca8ff;
-      --warn: #f3c969;
+      --paper: #f2efe8;
+      --paper-strong: #ebe6dc;
+      --ink: #191919;
+      --muted: #675f55;
+      --line: rgba(25, 25, 25, 0.12);
+      --line-strong: rgba(25, 25, 25, 0.28);
+      --panel: rgba(255, 252, 247, 0.82);
+      --accent: #d55c2b;
+      --accent-soft: rgba(213, 92, 43, 0.14);
+      --accent-alt: #0f8d84;
+      --accent-alt-soft: rgba(15, 141, 132, 0.14);
+      --ok: #23725f;
+      --shadow: 0 20px 60px rgba(50, 44, 35, 0.08);
+      --mono: "SFMono-Regular", "SF Mono", "IBM Plex Mono", "Cascadia Mono", "Fira Code", monospace;
+      --sans: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      --display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
     }
-    * { box-sizing: border-box; }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background:
+        linear-gradient(180deg, rgba(213, 92, 43, 0.08), transparent 24%),
+        linear-gradient(135deg, rgba(15, 141, 132, 0.06), transparent 48%),
+        var(--paper);
+    }
+
     body {
       margin: 0;
       min-height: 100vh;
-      color: var(--text);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      font-family: var(--sans);
       background:
-        radial-gradient(circle at top left, rgba(124, 168, 255, 0.16), transparent 28%),
-        radial-gradient(circle at 85% 10%, rgba(142, 230, 192, 0.12), transparent 24%),
-        linear-gradient(180deg, #050816 0%, #0a1020 100%);
+        radial-gradient(circle at top right, rgba(213, 92, 43, 0.1), transparent 24rem),
+        radial-gradient(circle at left 70%, rgba(15, 141, 132, 0.08), transparent 22rem);
     }
-    main { max-width: 1240px; margin: 0 auto; padding: 28px 22px 40px; }
-    .hero {
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    main {
+      width: min(1280px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 14px 0 32px;
+    }
+
+    .masthead {
       display: grid;
-      grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.9fr);
-      gap: 16px;
+      grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.85fr);
+      gap: 14px;
       align-items: stretch;
-      margin-bottom: 16px;
     }
+
     .panel {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 16px;
-      box-shadow: 0 18px 70px rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(14px);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
     }
-    .title-panel { padding: 22px; position: relative; overflow: hidden; }
-    .title-panel::after {
+
+    .hero {
+      padding: 20px 22px 22px;
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(140deg, rgba(255, 252, 247, 0.92), rgba(239, 233, 220, 0.82)),
+        var(--panel);
+    }
+
+    .hero::before {
       content: "";
       position: absolute;
-      inset: auto -14% -55% auto;
-      width: 320px;
-      height: 320px;
-      background: radial-gradient(circle, rgba(124, 168, 255, 0.2), transparent 65%);
+      right: -64px;
+      top: -96px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(213, 92, 43, 0.22), transparent 66%);
       pointer-events: none;
     }
-    .eyebrow { color: var(--accent); text-transform: uppercase; letter-spacing: 0.18em; font-size: 12px; margin: 0 0 10px; }
-    h1 { margin: 0; font-size: 38px; line-height: 1.05; letter-spacing: -0.03em; }
-    .lede { margin: 12px 0 0; max-width: 70ch; color: var(--muted); line-height: 1.6; }
-    .status-strip { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
-    .chip {
-      border: 1px solid var(--line-strong);
-      background: rgba(9, 14, 32, 0.64);
-      color: var(--text);
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 13px;
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      left: 38%;
+      bottom: -96px;
+      width: 280px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(15, 141, 132, 0.14), transparent 70%);
+      pointer-events: none;
     }
-    .status-card { padding: 18px; display: grid; gap: 12px; }
-    .status-row {
+
+    .kicker {
+      margin: 0 0 10px;
+      font: 700 11px/1.2 var(--mono);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 10ch;
+      font: 700 clamp(2.45rem, 5.2vw, 4.4rem)/0.92 var(--display);
+      letter-spacing: 0;
+    }
+
+    .lede {
+      max-width: 60ch;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: end;
+      margin-top: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-note {
+      display: grid;
+      gap: 6px;
+      max-width: 420px;
+    }
+
+    .note-row {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
+      gap: 16px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .hero-count {
+      min-width: 154px;
+      padding: 14px 16px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.44);
+    }
+
+    .hero-count-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font: 700 11px/1.2 var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .hero-count-value {
+      display: block;
+      font: 700 2.45rem/0.92 var(--display);
+    }
+
+    .ops {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(243, 238, 229, 0.95)),
+        var(--panel);
+    }
+
+    .ops-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
       gap: 12px;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
-    .status-row:last-child { border-bottom: 0; }
-    .label { color: var(--muted); font-size: 13px; }
-    .value { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
-    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 16px; }
-    .metric { padding: 18px; background: var(--bg-elevated); border: 1px solid var(--line); border-radius: 16px; }
-    .metric .k { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; }
-    .metric .v { font-size: 34px; font-weight: 700; margin-top: 10px; letter-spacing: -0.04em; }
-    .metric .sub { color: var(--muted); font-size: 13px; margin-top: 6px; line-height: 1.45; }
-    .sections { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.8fr); gap: 16px; margin-top: 16px; }
-    .section { padding: 18px; }
-    .section h2 { margin: 0 0 12px; font-size: 18px; }
-    .chart { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 8px; align-items: end; min-height: 180px; padding-top: 8px; }
-    .bar { display: flex; flex-direction: column; justify-content: end; gap: 8px; align-items: center; }
-    .bar span {
+
+    .ops-head h2,
+    .section-title {
+      margin: 0;
+      font: 700 1rem/1.1 var(--mono);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .pulse {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ok);
+      font: 700 11px/1.2 var(--mono);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .pulse::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 0 0 rgba(35, 114, 95, 0.42);
+      animation: pulse 2.4s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(35, 114, 95, 0.42); }
+      70% { box-shadow: 0 0 0 12px rgba(35, 114, 95, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(35, 114, 95, 0); }
+    }
+
+    .ops-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .ops-card {
+      padding: 12px 0 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .ops-label {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font: 700 11px/1.2 var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .ops-value {
+      font: 700 1.45rem/1 var(--display);
+    }
+
+    .ops-copy {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 12px;
+      align-items: center;
+      margin-top: 14px;
+      padding: 14px 16px;
+    }
+
+    .control-block {
+      display: grid;
+      gap: 8px;
+    }
+
+    .control-label {
+      color: var(--muted);
+      font: 700 11px/1.2 var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .segmented {
+      display: inline-grid;
+      grid-auto-flow: column;
+      gap: 6px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.56);
+      width: max-content;
+      max-width: 100%;
+    }
+
+    .segmented button {
+      border: 0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      background: transparent;
+      color: var(--muted);
+      font: 700 12px/1.2 var(--mono);
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      min-width: 72px;
+      transition: background 140ms ease, color 140ms ease, transform 140ms ease;
+    }
+
+    .segmented button:hover {
+      color: var(--ink);
+    }
+
+    .segmented button[aria-pressed="true"] {
+      background: var(--ink);
+      color: #f7f3ea;
+      transform: translateY(-1px);
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--accent-alt);
+      outline-offset: 2px;
+    }
+
+    .toolbar-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      max-width: 320px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .summary-card {
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.56);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .summary-card:nth-child(1) { border-color: rgba(213, 92, 43, 0.26); }
+    .summary-card:nth-child(2) { border-color: rgba(15, 141, 132, 0.28); }
+    .summary-card:nth-child(3) { border-color: rgba(25, 25, 25, 0.18); }
+    .summary-card:nth-child(4) { border-color: rgba(213, 92, 43, 0.18); }
+
+    .summary-label {
+      color: var(--muted);
+      font: 700 11px/1.2 var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .summary-value {
+      font: 700 clamp(1.75rem, 3vw, 2.2rem)/0.95 var(--display);
+    }
+
+    .summary-sub {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .split-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .split-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .split-bar {
+      position: relative;
+      overflow: hidden;
+      height: 7px;
+      margin-top: 6px;
+      border-radius: 999px;
+      background: rgba(25, 25, 25, 0.08);
+    }
+
+    .split-bar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), #ef996f);
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .section-panel {
+      padding: 16px 18px 18px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .section-copy {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 46ch;
+    }
+
+    .chart-frame {
+      display: grid;
+      gap: 12px;
+    }
+
+    .trend-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 2px;
+    }
+
+    .trend-stat {
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.5);
+      display: grid;
+      gap: 6px;
+    }
+
+    .trend-stat-label {
+      color: var(--muted);
+      font: 700 10px/1.2 var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .trend-stat-value {
+      font: 700 1.55rem/1 var(--display);
+    }
+
+    .trend-stat-copy {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .chart {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(18px, 1fr);
+      gap: 8px;
+      align-items: end;
+      min-height: 250px;
+      padding: 14px 0 8px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      overflow-x: auto;
+    }
+
+    .bar {
+      display: grid;
+      gap: 8px;
+      align-items: end;
+      min-width: 18px;
+      opacity: 0.96;
+    }
+
+    .bar-stack {
+      display: grid;
+      align-content: end;
+      gap: 2px;
+      min-height: 188px;
+      height: 188px;
+    }
+
+    .bar-segment {
       width: 100%;
-      border-radius: 8px 8px 4px 4px;
-      background: linear-gradient(180deg, rgba(142, 230, 192, 0.95), rgba(124, 168, 255, 0.8));
-      min-height: 6px;
+      min-height: 2px;
+      border-radius: 3px;
+      transition: transform 140ms ease, opacity 140ms ease;
     }
-    .bar label { font-size: 11px; color: var(--muted); white-space: nowrap; }
-    pre { margin: 0; font-size: 12px; line-height: 1.6; color: #d5ddff; overflow: auto; }
-    .footer { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 12px; color: var(--muted); font-size: 13px; }
-    @media (max-width: 960px) {
-      .hero, .sections, .grid { grid-template-columns: 1fr; }
+
+    .bar:hover .bar-segment {
+      transform: translateY(-2px);
+      opacity: 0.92;
+    }
+
+    .bar-muted {
+      opacity: 0.42;
+    }
+
+    .bar-active .bar-label {
+      color: var(--ink);
+    }
+
+    .seg-input { background: #1c7c72; }
+    .seg-cached { background: #8ebdb5; }
+    .seg-output { background: #d55c2b; }
+    .seg-reasoning { background: #f0b287; }
+
+    .bar-label {
+      color: var(--muted);
+      font: 700 10px/1.2 var(--mono);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .bar-label.is-hidden {
+      visibility: hidden;
+    }
+
+    .chart-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.56);
+      color: var(--muted);
+      font: 700 11px/1.2 var(--mono);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .meta-actions {
+      display: contents;
+    }
+
+    .meta-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.62);
+      color: var(--ink);
+      font: 700 11px/1.2 var(--mono);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .meta-toggle:hover {
+      border-color: var(--line-strong);
+    }
+
+    .meta-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .thread-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .thread-summary {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 12px;
+    }
+
+    .thread-summary strong {
+      font: 700 1.65rem/1 var(--display);
+    }
+
+    .thread-summary span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+      max-width: 28ch;
+      text-align: right;
+    }
+
+    .thread-lead {
+      padding: 14px;
+      border: 1px solid rgba(15, 141, 132, 0.2);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(244, 250, 248, 0.92));
+      display: grid;
+      gap: 10px;
+    }
+
+    .thread-lead-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .thread-kicker {
+      color: var(--accent-alt);
+      font: 700 10px/1.2 var(--mono);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .thread-lead-id {
+      margin-top: 4px;
+      font: 700 15px/1.35 var(--mono);
+      overflow-wrap: anywhere;
+    }
+
+    .thread-lead-copy {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .thread-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .thread-actions {
+      display: grid;
+    }
+
+    .thread-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.62);
+      color: var(--ink);
+      font: 700 11px/1.2 var(--mono);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .thread-toggle:hover {
+      border-color: var(--line-strong);
+    }
+
+    .thread-item {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.48);
+      display: grid;
+      gap: 8px;
+    }
+
+    .thread-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .thread-id {
+      font: 700 13px/1.45 var(--mono);
+      overflow-wrap: anywhere;
+    }
+
+    .thread-time {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .thread-model {
+      width: max-content;
+      max-width: 100%;
+      padding: 6px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font: 700 11px/1.2 var(--mono);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .empty {
+      padding: 20px 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .utility {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .utility-shell {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .utility-header {
+      display: none;
+    }
+
+    .utility-header-copy {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .utility-header-copy strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--ink);
+      font: 700 11px/1.2 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .utility-toolbar {
+      display: none;
+    }
+
+    .utility-panel {
+      display: block;
+    }
+
+    .utility-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.62);
+      color: var(--ink);
+      font: 700 11px/1.2 var(--mono);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .utility-toggle:hover {
+      border-color: var(--line-strong);
+    }
+
+    .meta-toggle[aria-expanded="true"],
+    .thread-toggle[aria-expanded="true"],
+    .utility-toggle[aria-expanded="true"] {
+      background: var(--ink);
+      color: #f7f3ea;
+      border-color: var(--ink);
+    }
+
+    .utility pre {
+      margin: 0;
+      padding: 16px;
+      overflow: auto;
+      max-height: 280px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(27, 27, 27, 0.94);
+      color: #f5ecdc;
+      font: 12px/1.55 var(--mono);
+    }
+
+    .footnote {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    @media (max-width: 1040px) {
+      .masthead,
+      .content-grid,
+      .utility {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .trend-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        overflow-x: hidden;
+      }
+
+      main {
+        width: calc(100vw - 12px);
+        padding-top: 8px;
+      }
+
+      .hero,
+      .ops,
+      .section-panel,
+      .toolbar {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .hero {
+        padding-top: 16px;
+        padding-bottom: 16px;
+      }
+
+      .hero::before {
+        right: -96px;
+        top: -120px;
+        width: 180px;
+        height: 180px;
+      }
+
+      .hero::after {
+        left: 50%;
+        bottom: -84px;
+        width: 200px;
+        height: 120px;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .ops-grid,
+      .utility {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .note-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+
+      .note-row strong {
+        width: 100%;
+        overflow-wrap: anywhere;
+      }
+
+      .segmented {
+        width: 100%;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(0, 1fr);
+      }
+
+      .segmented button {
+        width: auto;
+        min-width: 0;
+        padding: 8px 8px;
+        font-size: 11px;
+      }
+
+      .summary-card {
+        padding: 12px;
+        gap: 6px;
+      }
+
+      .summary-sub {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .chart {
+        min-height: 214px;
+      }
+
+      .bar-stack {
+        min-height: 148px;
+        height: 148px;
+      }
+
+      .toolbar {
+        gap: 10px;
+      }
+
+      .toolbar-note {
+        max-width: none;
+      }
+
+      .thread-top,
+      .thread-summary {
+        flex-direction: column;
+      }
+
+      .thread-summary span {
+        max-width: none;
+        text-align: left;
+      }
+
+      .thread-lead-top {
+        flex-direction: column;
+      }
+
+      .utility-toolbar {
+        display: block;
+        margin-top: 14px;
+      }
+
+      .utility-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.52);
+      }
+
+      .utility-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .utility-toolbar .segmented {
+        width: 100%;
+      }
+
+      .utility-toolbar .segmented button {
+        min-width: 0;
+      }
+
+      .utility-panel {
+        display: none;
+      }
+
+      .utility-panel.is-active {
+        display: block;
+      }
+
+      .utility.is-collapsed .utility-toolbar,
+      .utility.is-collapsed .utility-panel {
+        display: none;
+      }
+
+      .utility pre {
+        max-height: 220px;
+        font-size: 11px;
+      }
+
+      .footnote {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 540px) {
+      h1 {
+        max-width: none;
+        font-size: clamp(1.5rem, 8.2vw, 2.35rem);
+        line-height: 0.94;
+        overflow-wrap: anywhere;
+      }
+
+      .lede {
+        font-size: 13px;
+        line-height: 1.45;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .note-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .note-row strong {
+        width: 100%;
+      }
+
+      .hero-count {
+        min-width: 0;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .summary-card {
+        padding: 10px;
+      }
+
+      .summary-label {
+        font-size: 10px;
+      }
+
+      .summary-value {
+        font-size: 1.55rem;
+      }
+
+      .summary-sub {
+        font-size: 11px;
+        line-height: 1.3;
+      }
+
+      .trend-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .trend-stat {
+        padding: 10px 8px;
+        gap: 4px;
+      }
+
+      .trend-stat-label {
+        font-size: 9px;
+        letter-spacing: 0.08em;
+      }
+
+      .trend-stat-value {
+        font-size: 1.05rem;
+      }
+
+      .trend-stat-copy {
+        font-size: 10px;
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .bar-label {
+        font-size: 8px;
+      }
+
+      .chart-meta {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .meta-chip {
+        justify-content: center;
+        padding: 7px 6px;
+        font-size: 9px;
+        letter-spacing: 0.02em;
+      }
+
+      .meta-toggle {
+        width: 100%;
+        justify-content: center;
+        padding: 7px 6px;
+        font-size: 9px;
+        letter-spacing: 0.02em;
+      }
+
+      .meta-dot {
+        width: 6px;
+        height: 6px;
+      }
+
+      .thread-summary {
+        gap: 8px;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+      }
+
+      .thread-summary strong {
+        font-size: 1.4rem;
+      }
+
+      .thread-lead,
+      .thread-item {
+        padding: 12px;
+      }
+
+      .thread-lead-copy {
+        font-size: 11px;
+        line-height: 1.35;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .thread-id,
+      .thread-lead-id {
+        font-size: 12px;
+      }
+
+      .thread-time {
+        font-size: 11px;
+      }
+
+      .utility pre {
+        max-height: 180px;
+        padding: 12px;
+      }
+
+      .ops-value,
+      .trend-stat-value {
+        font-size: 1.35rem;
+      }
+
+      .summary-value {
+        font-size: 1.85rem;
+      }
     }
   </style>
 </head>
 <body>
   <main>
-    <div class="hero">
-      <section class="panel title-panel">
-        <p class="eyebrow">Codex Meter</p>
-        <h1>Local Codex usage, rendered as a live meter.</h1>
+    <section class="masthead">
+      <div class="panel hero">
+        <p class="kicker">Codex Meter</p>
+        <h1>Local token flow with a cleaner control surface.</h1>
         <p class="lede">
-          Track token usage in rolling windows, inspect recent threads, and keep the collector
-          local to your machine. The dashboard reads from the same usage store as the MCP tools.
+          Read the last minute, hour, or day at a glance. This dashboard stays local, follows the same usage store as the MCP server,
+          and turns raw token traffic into something you can scan in a few seconds.
         </p>
-        <div class="status-strip">
-          <span class="chip">1m / 1h / 24h windows</span>
-          <span class="chip">localhost ingest</span>
-          <span class="chip">MCP + dashboard</span>
-          <span class="chip">127.0.0.1:8080</span>
+        <div class="hero-grid">
+          <div class="hero-note">
+            <div class="note-row"><span>Current lens</span><strong id="hero-window">Last 24 hours</strong></div>
+            <div class="note-row"><span>Refresh cadence</span><strong>5 seconds</strong></div>
+            <div class="note-row"><span>Collector path</span><strong>127.0.0.1:4568</strong></div>
+          </div>
+          <div class="hero-count">
+            <span class="hero-count-label">Active total</span>
+            <span class="hero-count-value" id="hero-total">0</span>
+          </div>
         </div>
-      </section>
-      <aside class="panel status-card" id="health"></aside>
-    </div>
+      </div>
 
-    <section class="grid" id="summary"></section>
+      <aside class="panel ops">
+        <div class="ops-head">
+          <h2>Collector Status</h2>
+          <span class="pulse" id="collector-pulse">Live</span>
+        </div>
+        <div class="ops-grid">
+          <div class="ops-card">
+            <p class="ops-label">Health</p>
+            <div class="ops-value" id="health-status">Healthy</div>
+            <div class="ops-copy">The local dashboard and collector are reachable.</div>
+          </div>
+          <div class="ops-card">
+            <p class="ops-label">Buffered events</p>
+            <div class="ops-value" id="health-events">0</div>
+            <div class="ops-copy">Records currently loaded in the local store.</div>
+          </div>
+          <div class="ops-card">
+            <p class="ops-label">Last event</p>
+            <div class="ops-value" id="health-last">No activity in window</div>
+            <div class="ops-copy">Most recent activity seen in the current window.</div>
+          </div>
+          <div class="ops-card">
+            <p class="ops-label">Updated</p>
+            <div class="ops-value" id="health-refresh">Now</div>
+            <div class="ops-copy">Timestamp for the latest dashboard refresh.</div>
+          </div>
+        </div>
+      </aside>
+    </section>
 
-    <div class="sections">
-      <section class="panel section">
-        <h2>Usage Trend</h2>
-        <div class="chart" id="chart"></div>
-        <div class="footer" id="chart-meta"></div>
-      </section>
-      <section class="panel section">
-        <h2>Recent Threads</h2>
-        <pre id="threads">Loading...</pre>
-      </section>
+    <section class="panel toolbar" aria-label="Usage controls">
+      <div class="control-block">
+        <span class="control-label">Window</span>
+        <div class="segmented" id="window-controls" role="group" aria-label="Window selection"></div>
+      </div>
+      <div class="control-block">
+        <span class="control-label">Bucket</span>
+        <div class="segmented" id="bucket-controls" role="group" aria-label="Bucket selection"></div>
+      </div>
+      <div class="toolbar-note" id="toolbar-note">
+        Reading the last hour in five-minute buckets.
+      </div>
+    </section>
+
+    <section class="summary-grid" id="summary-grid" aria-live="polite"></section>
+
+    <section class="content-grid">
+      <div class="panel section-panel">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Trend View</h2>
+            <div class="section-copy" id="trend-copy">
+              Each bar stacks input, cached input, output, and reasoning tokens in the selected window.
+            </div>
+          </div>
+        </div>
+        <div class="chart-frame">
+          <div class="trend-stats" id="trend-stats" aria-live="polite"></div>
+          <div class="chart" id="chart" aria-label="Usage chart"></div>
+          <div class="chart-meta" id="chart-meta"></div>
+        </div>
+      </div>
+
+      <div class="panel section-panel">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Recent Threads</h2>
+            <div class="section-copy">
+              Most recent thread ids loaded from the same local log used by the MCP tools.
+            </div>
+          </div>
+        </div>
+        <div class="thread-list" id="threads"></div>
+      </div>
+    </section>
+
+    <section class="utility-shell">
+      <div class="utility-header">
+        <div class="utility-header-copy">
+          <strong>Raw data</strong>
+          Snapshot and collector JSON stay local and open on demand.
+        </div>
+        <button type="button" class="utility-toggle" id="utility-toggle-btn">Open raw data</button>
+      </div>
+      <div class="utility" id="utility-root">
+      <div class="utility-toolbar">
+        <div class="segmented" id="utility-controls" role="group" aria-label="Utility panel selection"></div>
+      </div>
+      <div class="panel section-panel utility-panel" data-panel="summary">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Selected Snapshot</h2>
+            <div class="section-copy">Structured payload for the active window.</div>
+          </div>
+        </div>
+        <pre id="summary-json">Loading…</pre>
+      </div>
+      <div class="panel section-panel utility-panel" data-panel="meta">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Collector Details</h2>
+            <div class="section-copy">Latest health state and currently selected chart settings.</div>
+          </div>
+        </div>
+        <pre id="meta-json">Loading…</pre>
+      </div>
+      </div>
+    </section>
+
+    <div class="footnote">
+      <span>Rendered from the local `usage.jsonl` store. No external services required.</span>
+      <span id="footnote-state">Waiting for first refresh.</span>
     </div>
   </main>
+
   <script>
     const windows = __WINDOWS__;
-    function fmtTime(value) {
-      if (!value) return 'never';
-      return new Date(value).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+    const windowLabels = { "1m": "Last minute", "1h": "Last hour", "24h": "Last 24 hours" };
+    const bucketOptionsByWindow = {
+      "1m": ["1m"],
+      "1h": ["1m", "5m"],
+      "24h": ["5m", "1h"]
+    };
+    const bucketLabels = { "1m": "1 minute", "5m": "5 minutes", "1h": "1 hour" };
+    const utilityLabels = { summary: "Snapshot", meta: "Collector" };
+    const state = { window: "24h", bucket: "1h", utilityPanel: "summary", utilityOpen: false, threadsExpanded: false, trendMetaExpanded: false, lastThreads: [], lastSeries: [] };
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat("en-US").format(value || 0);
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "No activity in window";
+      return new Date(value).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+    }
+
+    function setButtonGroup(containerId, values, activeValue, onSelect, labelMap) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = values.map((value) => (
+        '<button type="button" data-value="' + value + '" aria-pressed="' + String(value === activeValue) + '">' +
+          labelMap[value] +
+        '</button>'
+      )).join("");
+      for (const button of container.querySelectorAll("button")) {
+        button.addEventListener("click", () => onSelect(button.dataset.value));
+      }
+    }
+
+    function updateControls() {
+      setButtonGroup("window-controls", Object.keys(windows), state.window, (value) => {
+        state.window = value;
+        if (!bucketOptionsByWindow[value].includes(state.bucket)) {
+          state.bucket = bucketOptionsByWindow[value][0];
+        }
+        updateControls();
+        loadData();
+      }, windowLabels);
+      setButtonGroup("bucket-controls", bucketOptionsByWindow[state.window], state.bucket, (value) => {
+        state.bucket = value;
+        updateControls();
+        loadData();
+      }, bucketLabels);
+      document.getElementById("toolbar-note").textContent =
+        "Reading " + windowLabels[state.window].toLowerCase() + " in " + bucketLabels[state.bucket].toLowerCase() + " buckets.";
+    }
+
+    function updateUtilityPanels() {
+      const utilityRoot = document.getElementById("utility-root");
+      const utilityToggle = document.getElementById("utility-toggle-btn");
+      const compactUtility = useCompactUtility();
+      utilityRoot.classList.toggle("is-collapsed", compactUtility && !state.utilityOpen);
+      utilityToggle.textContent = compactUtility && state.utilityOpen ? "Hide raw data" : "Open raw data";
+      utilityToggle.setAttribute("aria-expanded", compactUtility ? String(state.utilityOpen) : "true");
+      setButtonGroup("utility-controls", Object.keys(utilityLabels), state.utilityPanel, (value) => {
+        state.utilityPanel = value;
+        updateUtilityPanels();
+      }, utilityLabels);
+      for (const panel of document.querySelectorAll(".utility-panel")) {
+        panel.classList.toggle("is-active", panel.dataset.panel === state.utilityPanel);
+      }
+    }
+
+    function useCompactThreadList() {
+      return window.matchMedia("(max-width: 540px)").matches;
+    }
+
+    function useCompactTrendMeta() {
+      return window.matchMedia("(max-width: 540px)").matches;
+    }
+
+    function useCompactUtility() {
+      return window.matchMedia("(max-width: 540px)").matches;
+    }
+
+    function buildSummaryCard(label, value, copy, accentWidth) {
+      return (
+        '<article class="summary-card">' +
+          '<div class="summary-label">' + label + '</div>' +
+          '<div class="summary-value">' + formatNumber(value) + '</div>' +
+          '<div class="summary-sub">' + copy + '</div>' +
+          '<div class="split-bar"><span style="width:' + accentWidth + '%"></span></div>' +
+        '</article>'
+      );
+    }
+
+    function renderSummary(summary) {
+      const total = Math.max(1, summary.totalTokens || 0);
+      const cards = [
+        buildSummaryCard("Total tokens", summary.totalTokens, "Across " + summary.eventCount + " events in the active window.", 100),
+        buildSummaryCard("Input", summary.inputTokens, "Direct prompt and context tokens entering the model.", Math.round((summary.inputTokens / total) * 100)),
+        buildSummaryCard("Cached input", summary.cachedInputTokens, "Reuse captured from cached context segments.", Math.round((summary.cachedInputTokens / total) * 100)),
+        buildSummaryCard("Output + reasoning", (summary.outputTokens || 0) + (summary.reasoningOutputTokens || 0), "Generated tokens and explicit reasoning output combined.", Math.round((((summary.outputTokens || 0) + (summary.reasoningOutputTokens || 0)) / total) * 100))
+      ];
+      document.getElementById("summary-grid").innerHTML = cards.join("");
+      document.getElementById("hero-total").textContent = formatNumber(summary.totalTokens);
+      document.getElementById("hero-window").textContent = windowLabels[state.window];
+      document.getElementById("summary-json").textContent = JSON.stringify(summary, null, 2);
+    }
+
+    function renderChart(series) {
+      state.lastSeries = series;
+      const chart = document.getElementById("chart");
+      const trendStats = document.getElementById("trend-stats");
+      if (!series.length) {
+        trendStats.innerHTML = "";
+        chart.innerHTML = '<div class="empty">No activity recorded for the selected range yet.</div>';
+        document.getElementById("chart-meta").innerHTML = "";
+        return;
+      }
+
+      const totals = series.map((bucket) =>
+        (bucket.inputTokens || 0) +
+        (bucket.cachedInputTokens || 0) +
+        (bucket.outputTokens || 0) +
+        (bucket.reasoningOutputTokens || 0)
+      );
+      const maxTotal = Math.max(1, ...totals);
+      const peakTotal = Math.max(...totals);
+      const peakIndex = totals.indexOf(peakTotal);
+      const latestActiveIndex = totals.reduce((foundIndex, total, index) => total > 0 ? index : foundIndex, -1);
+      const activeBucketCount = totals.filter((total) => total > 0).length;
+      const labelStep = series.length > 12 ? Math.ceil(series.length / 6) : 1;
+
+      trendStats.innerHTML = [
+        {
+          label: "Peak bucket",
+          value: formatNumber(peakTotal),
+          copy: peakTotal > 0 ? new Date(series[peakIndex].start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "No recorded spike"
+        },
+        {
+          label: "Last active",
+          value: latestActiveIndex >= 0 ? new Date(series[latestActiveIndex].start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Quiet",
+          copy: latestActiveIndex >= 0 ? formatNumber(totals[latestActiveIndex]) + " tokens in the latest non-zero bucket." : "No active buckets in this view."
+        },
+        {
+          label: "Active buckets",
+          value: formatNumber(activeBucketCount),
+          copy: formatNumber(series.length - activeBucketCount) + " quiet slices remain in the selected range."
+        }
+      ].map((item) => (
+        '<article class="trend-stat">' +
+          '<div class="trend-stat-label">' + item.label + '</div>' +
+          '<div class="trend-stat-value">' + item.value + '</div>' +
+          '<div class="trend-stat-copy">' + item.copy + '</div>' +
+        '</article>'
+      )).join("");
+
+      chart.innerHTML = series.map((bucket, index) => {
+        const label = new Date(bucket.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        const segments = [
+          { className: "seg-input", value: bucket.inputTokens || 0, label: "Input" },
+          { className: "seg-cached", value: bucket.cachedInputTokens || 0, label: "Cached" },
+          { className: "seg-output", value: bucket.outputTokens || 0, label: "Output" },
+          { className: "seg-reasoning", value: bucket.reasoningOutputTokens || 0, label: "Reasoning" }
+        ];
+        const total = totals[index];
+        const stack = segments.map((segment) => {
+          const segmentHeight = total === 0 ? 2 : Math.max(2, Math.round((segment.value / maxTotal) * 180));
+          return '<span class="bar-segment ' + segment.className + '" style="height:' + segmentHeight + 'px" title="' + segment.label + ': ' + formatNumber(segment.value) + '"></span>';
+        }).join("");
+        const showLabel = labelStep === 1 || index % labelStep === 0 || index === series.length - 1 || index === peakIndex || index === latestActiveIndex;
+        return (
+          '<div class="bar ' + (total === 0 ? 'bar-muted' : 'bar-active') + '" title="' + label + ' · ' + formatNumber(total) + ' total tokens">' +
+            '<div class="bar-stack">' + stack + '</div>' +
+            '<div class="bar-label ' + (showLabel ? '' : 'is-hidden') + '">' + label + '</div>' +
+          '</div>'
+        );
+      }).join("");
+
+      const latestTotal = totals[totals.length - 1] || 0;
+      const legendChips = [
+        ['Input', 'seg-input'],
+        ['Cached', 'seg-cached'],
+        ['Output', 'seg-output'],
+        ['Reasoning', 'seg-reasoning']
+      ].map(([label, className]) => (
+        '<span class="meta-chip"><span class="meta-dot ' + className + '"></span>' + label + '</span>'
+      )).join("");
+      const baseChips =
+        '<span class="meta-chip">Latest bucket ' + formatNumber(latestTotal) + '</span>' +
+        '<span class="meta-chip">' + bucketLabels[state.bucket] + ' slices</span>';
+      const compactMeta = useCompactTrendMeta();
+      document.getElementById("chart-meta").innerHTML =
+        compactMeta
+          ? baseChips +
+            '<div class="meta-actions">' +
+              '<button type="button" class="meta-toggle" id="trend-meta-toggle" aria-expanded="' + String(state.trendMetaExpanded) + '">' + (state.trendMetaExpanded ? 'Hide legend' : 'Show legend') + '</button>' +
+            '</div>' +
+            (state.trendMetaExpanded ? legendChips : '')
+          : legendChips + baseChips;
+      const trendMetaToggle = document.getElementById("trend-meta-toggle");
+      if (trendMetaToggle) {
+        trendMetaToggle.addEventListener("click", () => {
+          state.trendMetaExpanded = !state.trendMetaExpanded;
+          renderChart(state.lastSeries);
+        });
+      }
+    }
+
+    function renderThreads(threads) {
+      state.lastThreads = threads;
+      const root = document.getElementById("threads");
+      if (!threads.length) {
+        root.innerHTML = '<div class="empty">No recent threads yet. Once Codex starts exporting events, they show up here.</div>';
+        return;
+      }
+      const latestThread = threads[0];
+      const remainingThreads = threads.slice(1);
+      const compactList = useCompactThreadList();
+      const visibleThreads = compactList && !state.threadsExpanded ? remainingThreads.slice(0, 1) : remainingThreads;
+      const hiddenThreadCount = Math.max(0, remainingThreads.length - visibleThreads.length);
+      root.innerHTML = (
+        '<div class="thread-summary">' +
+          '<strong>' + formatNumber(threads.length) + '</strong>' +
+          '<span>Recent thread ids in memory. Latest activity from ' + formatDateTime(latestThread.lastEventAt) + '.</span>' +
+        '</div>'
+      ) +
+        '<article class="thread-lead">' +
+          '<div class="thread-lead-top">' +
+            '<div>' +
+              '<div class="thread-kicker">Latest thread</div>' +
+              '<div class="thread-lead-id">' + latestThread.threadId + '</div>' +
+            '</div>' +
+            '<div class="thread-time">' + formatDateTime(latestThread.lastEventAt) + '</div>' +
+          '</div>' +
+          '<div class="thread-model">' + (latestThread.model || 'unknown model') + '</div>' +
+          '<div class="thread-lead-copy">Most recent thread loaded from the shared local usage store.</div>' +
+        '</article>' +
+        '<div class="thread-stack">' +
+        visibleThreads.map((thread) => (
+        '<article class="thread-item">' +
+          '<div class="thread-top">' +
+            '<div class="thread-id">' + thread.threadId + '</div>' +
+            '<div class="thread-time">' + formatDateTime(thread.lastEventAt) + '</div>' +
+          '</div>' +
+          '<div class="thread-model">' + (thread.model || 'unknown model') + '</div>' +
+        '</article>'
+      )).join("") +
+        (compactList && remainingThreads.length > 2 ? (
+          '<div class="thread-actions">' +
+            '<button type="button" class="thread-toggle" id="thread-toggle-btn" aria-expanded="' + String(state.threadsExpanded) + '">' +
+              (state.threadsExpanded ? 'Show fewer threads' : 'Show ' + formatNumber(hiddenThreadCount) + ' more threads') +
+            '</button>' +
+          '</div>'
+        ) : '') +
+        '</div>';
+      const toggleButton = document.getElementById("thread-toggle-btn");
+      if (toggleButton) {
+        toggleButton.addEventListener("click", () => {
+          state.threadsExpanded = !state.threadsExpanded;
+          renderThreads(state.lastThreads);
+        });
+      }
+    }
+
+    function renderHealth(summary, health) {
+      const healthy = Boolean(health.ok);
+      document.getElementById("collector-pulse").textContent = healthy ? "Live" : "Down";
+      document.getElementById("collector-pulse").style.color = healthy ? "var(--ok)" : "var(--accent)";
+      document.getElementById("health-status").textContent = healthy ? "Healthy" : "Offline";
+      document.getElementById("health-events").textContent = formatNumber(health.events);
+      document.getElementById("health-last").textContent = formatDateTime(summary.lastEventAt);
+      document.getElementById("health-refresh").textContent = formatDateTime(Date.now());
+      document.getElementById("meta-json").textContent = JSON.stringify({
+        health,
+        activeWindow: state.window,
+        activeBucket: state.bucket,
+        refreshedAt: new Date().toISOString()
+      }, null, 2);
+      document.getElementById("footnote-state").textContent =
+        healthy ? "Collector healthy. Refreshing every 5 seconds." : "Collector did not respond cleanly on the last refresh.";
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Request failed for " + url + " with status " + response.status);
+      }
+      return response.json();
     }
 
     async function loadData() {
-      const summaryTargets = Object.keys(windows);
-      const summaries = await Promise.all(summaryTargets.map(async (window) => {
-        const res = await fetch('/api/usage/summary?window=' + window);
-        return [window, await res.json()];
-      }));
-      document.getElementById('summary').innerHTML = summaries.map(([window, data]) => {
-        const split = [
-          ['Input', data.inputTokens],
-          ['Cached', data.cachedInputTokens],
-          ['Output', data.outputTokens]
-        ].map(([label, value]) => '<div class="status-row"><div class="label">' + label + '</div><div class="value">' + value + '</div></div>').join('');
-        return '<article class="metric"><div class="k">' + window + '</div><div class="v">' + data.totalTokens + '</div><div class="sub">Average ' + data.averageTokensPerEvent + ' tokens per event. ' + data.eventCount + ' events in the window.</div>' + split + '</article>';
-      }).join('');
-
-      const health = await (await fetch('/health')).json();
-      document.getElementById('health').innerHTML =
-        '<div class="status-row"><div class="label">Collector</div><div class="value">' + (health.ok ? 'Healthy' : 'Down') + '</div></div>' +
-        '<div class="status-row"><div class="label">Buffered events</div><div class="value">' + health.events + '</div></div>' +
-        '<div class="status-row"><div class="label">Last refresh</div><div class="value">' + fmtTime(Date.now()) + '</div></div>' +
-        '<div class="status-row"><div class="label">Host</div><div class="value">127.0.0.1</div></div>';
-
-      const series = await (await fetch('/api/usage/timeseries?window=1h&bucket=5m')).json();
-      const maxValue = Math.max(1, ...series.map((bucket) => bucket.inputTokens + bucket.cachedInputTokens + bucket.outputTokens + bucket.reasoningOutputTokens));
-      document.getElementById('chart').innerHTML = series.map((bucket) => {
-        const total = bucket.inputTokens + bucket.cachedInputTokens + bucket.outputTokens + bucket.reasoningOutputTokens;
-        const height = Math.max(6, Math.round((total / maxValue) * 160));
-        const date = new Date(bucket.start);
-        const label = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        return '<div class="bar"><span style="height:' + height + 'px" title="' + label + ' · ' + total + ' tokens"></span><label>' + label + '</label></div>';
-      }).join('');
-      const latest = series.at(-1) || { inputTokens: 0, cachedInputTokens: 0, outputTokens: 0, reasoningOutputTokens: 0 };
-      document.getElementById('chart-meta').innerHTML = '<span>Window: 1 hour, bucket size: 5 minutes</span><span>Latest bucket: ' + (latest.inputTokens + latest.cachedInputTokens + latest.outputTokens + latest.reasoningOutputTokens) + ' tokens</span>';
-
-      const threads = await (await fetch('/api/usage/recent-threads')).json();
-      document.getElementById('threads').textContent = JSON.stringify(threads, null, 2);
+      try {
+        const [summary, series, threads, health] = await Promise.all([
+          fetchJson("/api/usage/summary?window=" + encodeURIComponent(state.window)),
+          fetchJson("/api/usage/timeseries?window=" + encodeURIComponent(state.window) + "&bucket=" + encodeURIComponent(state.bucket)),
+          fetchJson("/api/usage/recent-threads"),
+          fetchJson("/health")
+        ]);
+        renderSummary(summary);
+        renderChart(series);
+        renderThreads(threads);
+        renderHealth(summary, health);
+      } catch (error) {
+        document.getElementById("summary-grid").innerHTML =
+          buildSummaryCard("Load error", 0, error.message, 12);
+        document.getElementById("chart").innerHTML =
+          '<div class="empty">The dashboard could not refresh. Check the local collector and try again.</div>';
+        document.getElementById("threads").innerHTML =
+          '<div class="empty">Recent threads are unavailable until the collector responds again.</div>';
+        document.getElementById("summary-json").textContent = error.stack || error.message;
+        document.getElementById("meta-json").textContent = JSON.stringify({ error: error.message }, null, 2);
+        document.getElementById("footnote-state").textContent = "Last refresh failed.";
+      }
     }
 
+    updateControls();
+    updateUtilityPanels();
+    document.getElementById("utility-toggle-btn").addEventListener("click", () => {
+      state.utilityOpen = !state.utilityOpen;
+      updateUtilityPanels();
+    });
     loadData();
+    window.addEventListener("resize", () => {
+      if (!useCompactTrendMeta()) {
+        state.trendMetaExpanded = false;
+      }
+      if (!useCompactUtility()) {
+        state.utilityOpen = true;
+      }
+      if (state.lastSeries.length) {
+        renderChart(state.lastSeries);
+      }
+      if (state.lastThreads.length) {
+        if (!useCompactThreadList()) {
+          state.threadsExpanded = false;
+        }
+        renderThreads(state.lastThreads);
+      }
+      updateUtilityPanels();
+    });
     setInterval(loadData, 5000);
   </script>
 </body>
